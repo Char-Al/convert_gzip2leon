@@ -110,10 +110,12 @@ then
 	EXT=fastq.gz
 
 	for i in *; do
+		echo "########################################################"
 		if [ "${i}" != "${i%.${EXT}}" ];then
 			convert_file_test $i
 			#convert_file $i
 		fi
+		echo ""
 	done
 
 	cd $PWD_PROJECT
