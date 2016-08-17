@@ -91,14 +91,14 @@ convert_file_test () {
 	echo "gunzip $1";
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}"
-	echo "$PATH_LEON -c $fileBase";
+	echo "$PATH_LEON -c -file $fileBase -lossless";
 }
 convert_file () { 
 	echo "Conversion of file : '$1'";
 	gunzip $1
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}"
-	$PATH_LEON -c $fileBase
+	$PATH_LEON -c -file $fileBase -lossless
 }
 
 # -- Body ---------------------------------------------------------
@@ -112,8 +112,8 @@ then
 	for i in *; do
 		echo "########################################################"
 		if [ "${i}" != "${i%.${EXT}}" ];then
-			convert_file_test $i
-			#convert_file $i
+			#convert_file_test $i
+			convert_file $i
 		fi
 		echo ""
 	done
@@ -127,8 +127,8 @@ then
 	
 	cd $DIR
 	
-	convert_file_test $filename
-	#convert_file $filename
+	#convert_file_test $filename
+	convert_file $filename
 	
 	cd $PWD_PROJECT
 fi
