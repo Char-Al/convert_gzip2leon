@@ -169,25 +169,31 @@ convert_file_test () {
 	echo "rm $fileBase"
 }
 convert_file () { 
+	echo "MSG function 1 : I'm here $(pwd)"
 	echo "Conversion of file : '$1'";
 	
 	### UNZIP
 	CMD_GUNZIP="gunzip $1"
 	if $2;
 	then
+	echo "MSG function 2 : I'm here $(pwd)"
 		CMD_GUNZIP="$CMD_GUNZIP -k"
 	fi
 	$CMD_GUNZIP
+	echo "MSG function 3 : I'm here $(pwd)"
 	
 	### LEON
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}";
 	CMD_LEON="$PATH_LEON -c -file $fileBase";
+	echo "MSG function 4 : I'm here $(pwd)"
 	if $3;
 	then
+	echo "MSG function 5 : I'm here $(pwd)"
 		CMD_LEON="$CMD_LEON -lossless";
 	fi
 	$CMD_LEON
+	echo "MSG function 6 : I'm here $(pwd)"
 	
 	### DELETE FASTQ
 	rm $fileBase
@@ -209,12 +215,15 @@ recovery_fastq () {
 
 if [[ ! -z "$directory" ]]
 then
+	echo "MSG ERROR 1 : I'm here $(pwd)"
 	cd $directory
 
 	EXT=fastq.gz
+	echo "MSG ERROR 2 : I'm here $(pwd)"
 
 	for i in *; do
 		if [ "${i}" != "${i%.${EXT}}" ];then
+	echo "MSG ERROR 3 : I'm here $(pwd)"
 			echo "########################################################"
 			#convert_file_test $i $lossy $unkeep
 			convert_file $i
@@ -222,18 +231,21 @@ then
 		fi
 	done
 
+	echo "MSG ERROR 4 : I'm here $(pwd)"
 	cd $PWD_PROJECT
 fi
 
 if [[ ! -z "$filename" ]]
 then
+	echo "MSG 1 : I'm here $(pwd)"
 	DIR=$(dirname "${filename}")
 	
 	cd $DIR
-	
+	echo "MSG 2 : I'm here $(pwd)"
 	#convert_file_test $filename $lossy $unkeep
 	convert_file $filename
 	
+	echo "MSG 3 : I'm here $(pwd)"
 	cd $PWD_PROJECT
 fi
 
@@ -242,10 +254,13 @@ fi
 ########################################################
 ##### RECOVERY MODE
 
+	echo "MSG 4 : I'm here $(pwd)"
 if [[ ! -z "$recovery" ]]
 then
+	echo "MSG 5 : I'm here $(pwd)"
 	if [[ -f "$recovery" ]]
 	then
+	echo "MSG 6 : I'm here $(pwd)"
 		DIR=$(dirname "${recovery}")
 	
 		cd $DIR
@@ -257,11 +272,13 @@ then
 	fi
 	if [[ -d "$recovery" ]]
 	then
+	echo "MSG 7 : I'm here $(pwd)"
 		cd $recovery
 		EXT=leon
 		
 		for i in *; do
 			if [ "${i}" != "${i%.${EXT}}" ];then
+	echo "MSG 8 : I'm here $(pwd)"
 				BASE_NAME=$(basename "$i");
 				BASE_NAME="${BASE_NAME%.*}";
 				if [[ ! -f "$BASE_NAME.qual" ]]
@@ -280,6 +297,7 @@ then
 		cd $PWD_PROJECT
 	fi
 fi
+	echo "MSG 9 : I'm here $(pwd)"
 
 
 # -----------------------------------------------------------------
