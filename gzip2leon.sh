@@ -30,6 +30,9 @@ while [ "$1" != "" ]; do
 		-r | --repertory )		shift
 								repertory=$1
 								;;
+		-p | --path_of_leon )	shift
+								PATH_LEON=$1
+								;;
 		-h | --help )			usage
 								exit
 								;;
@@ -88,17 +91,19 @@ fi
 
 convert_file_test () { 
 	echo "Conversion of file : '$1'";
-	echo "gunzip $1";
+	echo "gunzip -k $1";
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}"
 	echo "$PATH_LEON -c -file $fileBase -lossless";
+	echo "rm $fileBase";
 }
 convert_file () { 
 	echo "Conversion of file : '$1'";
-	gunzip $1
+	gunzip -k $1
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}"
 	$PATH_LEON -c -file $fileBase -lossless
+	rm $fileBase
 }
 
 # -- Body ---------------------------------------------------------
