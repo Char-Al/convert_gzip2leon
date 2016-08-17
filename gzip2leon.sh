@@ -4,22 +4,38 @@
 #          Convert fastq.gz to leon
 # ------------------------------------------------------------------
 VERSION=0.1.0
-USAGE="Usage:	gzip2leon.sh -h -f <filename.fastq.gzip> -r <repertory>"
+USAGE="Usage:	gzip2leon.sh -h -f <filename.fastq.gzip> -r <directory>"
 PWD_PROJECT=$(pwd)
 PATH_LEON="/Users/adminbioinfo/Documents/Leon/leon/leon";
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 usage ()
 {
 	echo 'This script convert fastq.gz to fastq.leon';
-	echo 'Usage :';
-	echo '	* gzip2leon.sh -h	: show this help message';
+	echo 'Usage : gzip2leon.sh';
+	echo '	Mandatory arguments :';
+	echo '		* -f|--file <file.fastq.gz>	: convert the file.fastq.gz to file.fastq.leon (can be used with -d option)';
+	echo '		* -d|--directory <directory>	: convert all fastq.gz into the directory in fastq.leon (can be used with -f option)';
+	echo '		* -r|--recovery	<file.leon or directory> : If you want recover fastq from file.leon (can be used with others option but it is not recommended)';
 	echo '';
-	echo '	* gzip2leon.sh -f|--file <file.fastq.gz>	: convert the file.fastq.gz to file.fastq.leon';
-	echo '	* gzip2leon.sh -r|--repertory <repertory>	: convert all fastq.gz into the repertory in fastq.leon (can be used with -f option)';
+	echo '	Optional arguments :';
+	echo '		* -p|--path_of_leon </Path/of/leon>	: If you need to change the path of leon (default : "/Users/adminbioinfo/Documents/Leon/leon/leon")';
+	echo '		* -l|--lossy	: If you want to launch LEON in lossy mode (default : false)';
+	echo '		* -u|--unkeep	: If you dont want to keep initial gzip (default : false)';
+	echo '';
+	echo '	General arguments';
+	echo '		* -h	: show this help message and exit';
+	echo '';
 	exit
 }
 
 # --- Option processing --------------------------------------------
+filename=""
+directory=""
+recovery=""
+lossy=true
+unkeep=true
 
 # Parse command line
 while [ "$1" != "" ]; do
@@ -27,11 +43,20 @@ while [ "$1" != "" ]; do
 		-f | --file )			shift
 								filename=$1
 								;;
-		-r | --repertory )		shift
-								repertory=$1
+		-d | --directory )		shift
+								directory=$1
+								;;
+		-r | --recovery )		shift
+								recovery=$1
 								;;
 		-p | --path_of_leon )	shift
 								PATH_LEON=$1
+								;;
+		-l | --lossy )			shift
+								lossy=false
+								;;
+		-u | --unkeep )			shift
+								unkeep=false
 								;;
 		-h | --help )			usage
 								exit
@@ -44,38 +69,39 @@ done
 
 ##### Control options
 ### First level : check if options are used
-if [[ -z "$filename" ]] && [[ -z "$repertory" ]]
+if [[ -z "$filename" ]] && [[ -z "$directory" ]] && [[ -z "$recovery" ]]
 then
     usage
     exit
 fi
 
-### Second level : check if the files or repertory exists
+
+### Second level : check if the files or directory exists
 if [[ ! -e "$filename" ]] && [[ ! -z "$filename" ]]
 then
-	echo "File : '$filename' does not exist !";
+	echo "${RED}File : '$filename' does not exist !${NC}";
     usage
     exit
 fi
 
-if [[ ! -e "$repertory" ]] && [[ ! -z "$repertory" ]]
+if [[ ! -e "$directory" ]] && [[ ! -z "$directory" ]]
 then
-	echo "Repertory : '$repertory' does not exist !";
+	echo "${RED}Directory : '$directory' does not exist !${NC}";
     usage
     exit
 fi
 
-### Third level : check if "filename" is a file and "repertory" is a repertory
+### Third level : check if "filename" is a file and "directory" is a directory
 if [[ ! -f "$filename" ]] && [[ ! -z "$filename" ]]
 then
-	echo "File : '$filename' is not a regular file !";
+	echo "${RED}File : '$filename' is not a regular file !${NC}";
     usage
     exit
 fi
 
-if [[ ! -d "$repertory" ]] && [[ ! -z "$repertory" ]]
+if [[ ! -d "$directory" ]] && [[ ! -z "$directory" ]]
 then
-	echo "Repertory : '$repertory' is not a repertory !";
+	echo "${RED}Directory : '$directory' is not a directory !${NC}";
     usage
     exit
 fi
@@ -83,44 +109,117 @@ fi
 ### Bonus level : check if "filename" is with ".fastq.gz" extension
 if [ ! ${filename: -9} == ".fastq.gz" ]
 then
-	echo "File : '$filename' is not a '.fastq.gz'";
+	echo "${RED}File : '$filename' is not a '.fastq.gz'${NC}";
     usage
     exit
+fi
+
+### Unicorn level : check 'recovery'
+if [[ ! -d "$recovery" ]] && [[ ! -z "$recovery" ]]
+then
+	if [[ ! -f "$recovery" ]]
+	then
+		echo "${RED}'$recovery' is not a file or a repertory !${NC}"
+		usage
+		exit
+	fi
+fi
+if [[ -f "$recovery" ]]
+then
+	if [ ! ${recovery: -5} == ".leon" ]
+	then
+		echo "${RED}File : '$recovery' is not a '.leon'${NC}";
+    	usage
+    	exit
+    fi
+    DIR=$(dirname "${recovery}");
+    BASE_NAME=$(basename "$recovery");
+	BASE_NAME="${BASE_NAME%.*}";
+	if [[ ! -f "$DIR/$BASE_NAME.qual" ]]
+	then
+		echo "${RED}File : '$DIR/$BASE_NAME.qual' does not exist or is not a regular file.${NC}";
+    	usage
+    	exit
+	fi
 fi
 # -- Functions ---------------------------------------------------------
 
 convert_file_test () { 
 	echo "Conversion of file : '$1'";
-	echo "gunzip -k $1";
+	
+	### UNZIP
+	CMD_GUNZIP="gunzip $1"
+	if $2;
+	then
+		CMD_GUNZIP="$CMD_GUNZIP -k"
+	fi
+	echo "$CMD_GUNZIP"
+	
+	### LEON
 	fileBase=$(basename "$1");
-	fileBase="${fileBase%.*}"
-	echo "$PATH_LEON -c -file $fileBase -lossless";
-	echo "rm $fileBase";
+	fileBase="${fileBase%.*}";
+	CMD_LEON="$PATH_LEON -c -file $fileBase";
+	if $3;
+	then
+		CMD_LEON="$CMD_LEON -lossless"
+	fi
+	echo "$CMD_LEON"
+	
+	### DELETE FASTQ
+	echo "rm $fileBase"
 }
 convert_file () { 
 	echo "Conversion of file : '$1'";
-	gunzip -k $1
+	
+	### UNZIP
+	CMD_GUNZIP="gunzip $1"
+	if $2;
+	then
+		CMD_GUNZIP="$CMD_GUNZIP -k"
+	fi
+	$CMD_GUNZIP
+	
+	### LEON
 	fileBase=$(basename "$1");
-	fileBase="${fileBase%.*}"
-	$PATH_LEON -c -file $fileBase -lossless
+	fileBase="${fileBase%.*}";
+	CMD_LEON="$PATH_LEON -c -file $fileBase";
+	if $3;
+	then
+		CMD_LEON="$CMD_LEON -lossless";
+	fi
+	$CMD_LEON
+	
+	### DELETE FASTQ
 	rm $fileBase
 }
 
+recovery_fastq_test () {
+	echo "Recovery fastq from : $1";
+	CMD_RECOVERY="$PATH_LEON -file $1 -d";
+	echo "$CMD_RECOVERY";
+}
+recovery_fastq () {
+	echo "Recovery fastq from : $1";
+	CMD_RECOVERY="$PATH_LEON -file $1 -d";
+	$CMD_RECOVERY
+}
+
+
 # -- Body ---------------------------------------------------------
 
-if [[ ! -z "$repertory" ]]
+if [[ ! -z "$directory" ]]
 then
-	cd $repertory
+	cd $directory
 
 	EXT=fastq.gz
 
 	for i in *; do
-		echo "########################################################"
 		if [ "${i}" != "${i%.${EXT}}" ];then
-			#convert_file_test $i
+			echo "########################################################"
+			#convert_file_test $i $lossy $unkeep
 			convert_file $i
+			echo ""
 		fi
-		echo ""
 	done
 
 	cd $PWD_PROJECT
@@ -132,10 +231,54 @@ then
 	
 	cd $DIR
 	
-	#convert_file_test $filename
+	#convert_file_test $filename $lossy $unkeep
 	convert_file $filename
 	
 	cd $PWD_PROJECT
+fi
+
+
+
+########################################################
+##### RECOVERY MODE
+
+if [[ ! -z "$recovery" ]]
+then
+	if [[ -f "$recovery" ]]
+	then
+		DIR=$(dirname "${recovery}")
+	
+		cd $DIR
+	
+		recovery_fastq_test $recovery
+		#recovery_fastq $filename
+	
+		cd $PWD_PROJECT
+	fi
+	if [[ -d "$recovery" ]]
+	then
+		cd $recovery
+		EXT=leon
+		
+		for i in *; do
+			if [ "${i}" != "${i%.${EXT}}" ];then
+				BASE_NAME=$(basename "$i");
+				BASE_NAME="${BASE_NAME%.*}";
+				if [[ ! -f "$BASE_NAME.qual" ]]
+				then
+					echo "${RED}File : '$BASE_NAME.qual' does not exist or is not a regular file.${NC}";
+					usage
+					exit
+				fi
+				echo "########################################################"
+				recovery_fastq_test $i
+				#recovery_fastq $i
+			fi
+			echo ""
+		done
+		
+		cd $PWD_PROJECT
+	fi
 fi
 
 
