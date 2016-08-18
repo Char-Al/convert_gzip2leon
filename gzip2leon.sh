@@ -7,8 +7,9 @@ VERSION=0.1.0
 USAGE="Usage:	gzip2leon.sh -h -f <filename.fastq.gzip> -r <directory>"
 PWD_PROJECT=$(pwd)
 PATH_LEON="/Users/adminbioinfo/Documents/Leon/leon/leon";
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+RED='\033[1;31m';
+PINKUNICORN='\033[0;35m';
+NC='\033[0m'; # No Color
 
 usage ()
 {
@@ -28,6 +29,12 @@ usage ()
 	echo '		* -h	: show this help message and exit';
 	echo '		* -t	: test mode (dont execute command just print them)';
 	echo '';
+	echo "${PINKUNICORN}";
+	echo "		      _ __,~~~/";
+	echo "		,~~\`( )_( )-\\|";
+	echo "		    |/|  \`--.";
+	echo "		    ! !  !";
+	echo "		By PinkUnicorn (CVG)${NC}";
 	exit
 }
 
@@ -63,7 +70,7 @@ while [ "$1" != "" ]; do
 		-h | --help )			usage
 								exit
 								;;
-		-t | --test )			usage
+		-t | --test )			shift
 								testMode=true
 								;;
 		* )						usage
@@ -298,11 +305,5 @@ then
 		cd $PWD_PROJECT
 	fi
 fi
-
-
-echo "      _ __,~~~/";
-echo ",~~`( )_( )-\|";
-echo "    |/|  `--.";
-echo "    ! !  !";
 
 # -----------------------------------------------------------------
