@@ -8,6 +8,7 @@ USAGE="Usage:	gzip2leon.sh -h -f <filename.fastq.gzip> -r <directory>"
 PWD_PROJECT=$(pwd)
 PATH_LEON="/Users/adminbioinfo/Documents/Leon/leon/leon";
 RED='\033[1;31m';
+WARNING='\033[1;33m';
 PINKUNICORN='\033[0;35m';
 NC='\033[0m'; # No Color
 
@@ -34,7 +35,7 @@ usage ()
 	echo "		,~~\`( )_( )-\\|";
 	echo "		    |/|  \`--.";
 	echo "		    ! !  !";
-	echo "		By PinkUnicorn (CVG)${NC}";
+	echo "		PinkUnicorn${NC}";
 	exit
 }
 
@@ -61,17 +62,14 @@ while [ "$1" != "" ]; do
 		-p | --path_of_leon )	shift
 								PATH_LEON=$1
 								;;
-		-l | --lossy )			shift
-								lossy=false
+		-l | --lossy )			lossy=false
 								;;
-		-u | --unkeep )			shift
-								unkeep=false
+		-u | --unkeep )			unkeep=false
+								;;
+		-t | --test )			testMode=true
 								;;
 		-h | --help )			usage
 								exit
-								;;
-		-t | --test )			shift
-								testMode=true
 								;;
 		* )						usage
 								exit 1
@@ -156,7 +154,7 @@ then
 fi
 # -- Functions ---------------------------------------------------------
 
-convert_file_test () { 
+convert_file_test () {
 	echo "Conversion of file : '$1'";
 	
 	### UNZIP
@@ -206,14 +204,29 @@ convert_file () {
 }
 
 recovery_fastq_test () {
+	BASE_NAME=$(basename "$1");
+	BASE_NAME="${BASE_NAME%.*}";
+	echo "$BASE_NAME"
+	
 	echo "Recovery fastq from : $1";
 	CMD_RECOVERY="$PATH_LEON -file $1 -d";
 	echo "$CMD_RECOVERY";
+	
+	echo "rm $BASE_NAME.qual $BASE_NAME.leon";
+	echo "mv $BASE_NAME.d $BASE_NAME";
+	echo "gzip $BASE_NAME";
 }
 recovery_fastq () {
+	BASE_NAME=$(basename "$1");
+	BASE_NAME="${BASE_NAME%.*}";
+	
 	echo "Recovery fastq from : $1";
 	CMD_RECOVERY="$PATH_LEON -file $1 -d";
 	$CMD_RECOVERY
+	
+	rm $BASE_NAME.qual $BASE_NAME.leon
+	mv $BASE_NAME.d $BASE_NAME
+	gzip $BASE_NAME
 }
 
 
@@ -229,9 +242,9 @@ then
 		if [ "${i}" != "${i%.${EXT}}" ];then
 			echo "########################################################"
 				if $testMode; then
-					convert_file_test $filename $unkeep $lossy
+					convert_file_test $i $unkeep $lossy
 				else
-					convert_file $filename $unkeep $lossy
+					convert_file $i $unkeep $lossy
 				fi
 			echo ""
 		fi
@@ -247,6 +260,7 @@ then
 	cd $DIR
 	
 	if $testMode; then
+		echo "lossy $lossy	; unkeep $unkeep"
 		convert_file_test $filename $unkeep $lossy
 	else
 		convert_file $filename $unkeep $lossy
@@ -283,21 +297,22 @@ then
 		
 		for i in *; do
 			if [ "${i}" != "${i%.${EXT}}" ];then
+				echo "########################################################"
 				BASE_NAME=$(basename "$i");
 				BASE_NAME="${BASE_NAME%.*}";
 				if [[ ! -f "$BASE_NAME.qual" ]]
 				then
-					echo "${RED}File : '$BASE_NAME.qual' does not exist or is not a regular file.${NC}";
-					usage
-					exit
+					echo "${WARNING}WARNING : Found '$BASE_NAME.leon' but not '$BASE_NAME.qual'. File ignored !${NC}";
+					#usage
+					continue
 				fi
-				echo "########################################################"
 				
 				if $testMode; then
 					recovery_fastq_test $i
 				else
 					recovery_fastq $i
 				fi
+				
 			fi
 			echo ""
 		done
