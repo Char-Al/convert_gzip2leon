@@ -37,6 +37,7 @@ directory=""
 recovery=""
 lossy=true
 unkeep=true
+testMode=false
 
 # Parse command line
 while [ "$1" != "" ]; do
@@ -61,6 +62,9 @@ while [ "$1" != "" ]; do
 								;;
 		-h | --help )			usage
 								exit
+								;;
+		-t | --test )			usage
+								testMode=true
 								;;
 		* )						usage
 								exit 1
@@ -217,7 +221,7 @@ then
 	for i in *; do
 		if [ "${i}" != "${i%.${EXT}}" ];then
 			echo "########################################################"
-				if $test; then
+				if $testMode; then
 					convert_file_test $filename $unkeep $lossy
 				else
 					convert_file $filename $unkeep $lossy
@@ -235,7 +239,7 @@ then
 	
 	cd $DIR
 	
-	if $test; then
+	if $testMode; then
 		convert_file_test $filename $unkeep $lossy
 	else
 		convert_file $filename $unkeep $lossy
@@ -257,7 +261,7 @@ then
 	
 		cd $DIR
 	
-		if $test; then
+		if $testMode; then
 			recovery_fastq_test $i
 		else
 			recovery_fastq $i
@@ -282,7 +286,7 @@ then
 				fi
 				echo "########################################################"
 				
-				if $test; then
+				if $testMode; then
 					recovery_fastq_test $i
 				else
 					recovery_fastq $i
