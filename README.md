@@ -10,7 +10,7 @@ Indeed, LEON show greats performances compare to gzip (see : [here](https://gith
 ## What ?
 
 This script was developed to recompressed fastq, already compressed with gzip, with LEON.
-I dont recommend to use this to do both in the same time (even if it could).
+I dont recommend to use this script to do both (gz2leon and leon2gz) in the same time (even if it could).
 
 ## Usage
 
@@ -31,6 +31,12 @@ Usage : gzip2leon.sh
 	* `-t`	: test mode (dont execute command just print them)
 
 ---
+
+## Gain in real
+
+Size of .fastq.gz | Size of .fastq{.leon,.qual} | Space gain | Percent space gain
+:---------------: | :-------------------------: | :--------: | :----------------:
+~ 141,28 Go (~ 51.71 Go) | ~ Go (~ 29,92 Go) | ~ Go (~ 21.79 Go) | ~ % (~ 57,86 %)
 
 ## References
 
