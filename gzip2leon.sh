@@ -14,7 +14,7 @@ NC='\033[0m'; # No Color
 
 usage ()
 {
-	echo 'This script convert fastq.gz to fastq.leon';
+	echo 'This script convert fastq.gz to fastq.leon and reverse.';
 	echo 'Usage : gzip2leon.sh';
 	echo '	Mandatory arguments :';
 	echo '		* -f|--file <file.fastq.gz>	: convert the file.fastq.gz to file.fastq.leon (can be used with -d option)';
