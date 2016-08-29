@@ -36,7 +36,10 @@ Usage : gzip2leon.sh
 
 Size of .fastq.gz | Size of .fastq{.leon,.qual} | Space gain | Percent space gain
 :---------------: | :-------------------------: | :--------: | :----------------:
-~ 141,28 Go (~ 51.71 Go) | ~ Go (~ 29,92 Go) | ~ Go (~ 21.79 Go) | ~ % (~ 57,86 %)
+141.28 Go | 82.75 Go | 58.53 Go | 41.43 %
+322.91 Go | 205.88 Go | 117.03 Go | 36.24 %
+464.19 Go | 288.63 Go | 175.56 Go | 37.82 %
+
 
 ## References
 
