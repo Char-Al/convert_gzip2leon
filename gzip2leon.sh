@@ -30,12 +30,6 @@ usage ()
 	echo '		* -h	: show this help message and exit';
 	echo '		* -t	: test mode (dont execute command just print them)';
 	echo '';
-	echo "${PINKUNICORN}";
-	echo "		      _ __,~~~/";
-	echo "		,~~\`( )_( )-\\|";
-	echo "		    |/|  \`--.";
-	echo "		    ! !  !";
-	echo "		PinkUnicorn${NC}";
 	exit
 }
 
@@ -156,7 +150,7 @@ fi
 
 convert_file_test () {
 	echo "Conversion of file : '$1'";
-	
+
 	### UNZIP
 	CMD_GUNZIP="gunzip $1"
 	if $2;
@@ -164,7 +158,7 @@ convert_file_test () {
 		CMD_GUNZIP="$CMD_GUNZIP -k"
 	fi
 	echo "$CMD_GUNZIP"
-	
+
 	### LEON
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}";
@@ -174,13 +168,13 @@ convert_file_test () {
 		CMD_LEON="$CMD_LEON -lossless"
 	fi
 	echo "$CMD_LEON"
-	
+
 	### DELETE FASTQ
 	echo "rm $fileBase"
 }
-convert_file () { 
+convert_file () {
 	echo "Conversion of file : '$1'";
-	
+
 	### UNZIP
 	CMD_GUNZIP="gunzip $1"
 	if $2;
@@ -188,7 +182,7 @@ convert_file () {
 		CMD_GUNZIP="$CMD_GUNZIP -k"
 	fi
 	$CMD_GUNZIP
-	
+
 	### LEON
 	fileBase=$(basename "$1");
 	fileBase="${fileBase%.*}";
@@ -198,7 +192,7 @@ convert_file () {
 		CMD_LEON="$CMD_LEON -lossless";
 	fi
 	$CMD_LEON
-	
+
 	### DELETE FASTQ
 	rm $fileBase
 }
@@ -207,11 +201,11 @@ recovery_fastq_test () {
 	BASE_NAME=$(basename "$1");
 	BASE_NAME="${BASE_NAME%.*}";
 	echo "$BASE_NAME"
-	
+
 	echo "Recovery fastq from : $1";
 	CMD_RECOVERY="$PATH_LEON -file $1 -d";
 	echo "$CMD_RECOVERY";
-	
+
 	echo "rm $BASE_NAME.qual $BASE_NAME.leon";
 	echo "mv $BASE_NAME.d $BASE_NAME";
 	echo "gzip $BASE_NAME";
@@ -219,11 +213,11 @@ recovery_fastq_test () {
 recovery_fastq () {
 	BASE_NAME=$(basename "$1");
 	BASE_NAME="${BASE_NAME%.*}";
-	
+
 	echo "Recovery fastq from : $1";
 	CMD_RECOVERY="$PATH_LEON -file $1 -d";
 	$CMD_RECOVERY
-	
+
 	rm $BASE_NAME.qual $BASE_NAME.leon
 	mv $BASE_NAME.d $BASE_NAME
 	gzip $BASE_NAME
@@ -256,16 +250,16 @@ fi
 if [[ ! -z "$filename" ]]
 then
 	DIR=$(dirname "${filename}")
-	
+
 	cd $DIR
-	
+
 	if $testMode; then
 		echo "lossy $lossy	; unkeep $unkeep"
 		convert_file_test $filename $unkeep $lossy
 	else
 		convert_file $filename $unkeep $lossy
 	fi
-	
+
 	cd $PWD_PROJECT
 fi
 
@@ -279,22 +273,22 @@ then
 	if [[ -f "$recovery" ]]
 	then
 		DIR=$(dirname "${recovery}")
-	
+
 		cd $DIR
-	
+
 		if $testMode; then
 			recovery_fastq_test $i
 		else
 			recovery_fastq $i
 		fi
-	
+
 		cd $PWD_PROJECT
 	fi
 	if [[ -d "$recovery" ]]
 	then
 		cd $recovery
 		EXT=leon
-		
+
 		for i in *; do
 			if [ "${i}" != "${i%.${EXT}}" ];then
 				echo "########################################################"
@@ -306,17 +300,17 @@ then
 					#usage
 					continue
 				fi
-				
+
 				if $testMode; then
 					recovery_fastq_test $i
 				else
 					recovery_fastq $i
 				fi
-				
+
 			fi
 			echo ""
 		done
-		
+
 		cd $PWD_PROJECT
 	fi
 fi
