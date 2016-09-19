@@ -1,7 +1,7 @@
 #!/bin/bash
 # ------------------------------------------------------------------
 # [Charles VAN GOETHEM] gzip2leon
-#          Convert fastq.gz to leon
+#          Convert fastq.gz to leon and reverse
 # ------------------------------------------------------------------
 VERSION=0.1.0
 USAGE="Usage:	gzip2leon.sh -h -f <filename.fastq.gzip> -r <directory>"
